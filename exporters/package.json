@@ -1,0 +1,17 @@
+{
+  "name": "exporters",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
+    "prom-client": "^14.1.0"
+  }
+}

@@ -1,6 +1,8 @@
-const { ethers } = require('ethers')
+const { ethers, BigNumber } = require('ethers')
 
 const { ALCHEMY_API_KEY } = process.env
+
+const { addresses, tokenDecimals } = require('./const')
 
 const provider = new ethers.providers.AlchemyProvider(
   1,
@@ -20,33 +22,6 @@ const vaultABI = [
 const stratABI = [
   'function checkBalance(address asset) external view returns (uint256)'
 ]
-
-const addresses = {
-  DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
-  USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-  USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-
-  OUSD: '0x2a8e1e676ec238d8a992307b495b45b3feaa5e86',
-  OGV: '0x9c354503c38481a7a7a51629142963f98ecc12d0',
-
-  COMP: '0xc00e94cb662c3520282e6f5717214004a7f26888',
-
-  Vault: '0xe75d77b1865ae93c7eaa3040b038d7aa7bc02f70',
-  CompoundStrategy: '0x9c459eeb3fa179a40329b81c1635525e9a0ef094',
-  ConvexStrategy: '0xea2ef2e2e5a749d4a66b41db9ad85a38aa264cb3',
-  AaveStrategy: '0x5e3646a1db86993f73e6b74a57d8640b69f7e259',
-  MorphoCompoundStrategy: '0x5a4eee58744d1430876d5ca93cab5ccb763c037d',
-  OUSDMetaStrategy: '0x89eb88fedc50fc77ae8a18aad1ca0ac27f777a90',
-}
-
-const tokenDecimals = {
-  OUSD: 18,
-  OGV: 18,
-  DAI: 18,
-  USDT: 6,
-  USDC: 6,
-  COMP: 18,
-}
 
 const contracts = {
   DAI: null,
@@ -115,6 +90,23 @@ for (const strat of ["CompoundStrategy", "ConvexStrategy", "AaveStrategy", "Morp
   contractByAddress[address] = contract
 }
 
+function getSymbolByAddress(address) {
+  // TODO: Memoize this function
+  const symbol = Object.keys(addresses).find(symbol => addresses[symbol].toLowerCase() === address.toLowerCase())
+  return symbol
+}
+
+function convertToNumber(value, tokenAddressOrSymbol) {
+  const symbol = tokenAddressOrSymbol.startsWith('0x') ? getSymbolByAddress(tokenAddressOrSymbol) : tokenAddressOrSymbol
+  const decimals = tokenDecimals[symbol] || 18
+
+  const scaledValue = BigNumber.from(value).div(
+    BigNumber.from('10').pow(decimals)
+  )
+
+  return scaledValue.toNumber()
+}
+
 module.exports = {
   provider,
   addresses,
@@ -122,4 +114,7 @@ module.exports = {
   contractByAddress,
   contracts,
   tokenDecimals,
+
+  getSymbolByAddress,
+  convertToNumber
 }

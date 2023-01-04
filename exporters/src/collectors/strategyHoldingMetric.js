@@ -1,5 +1,5 @@
 const { BigNumber } = require('ethers')
-const { addresses, contracts, contractByAddress, tokenDecimals } = require('../utils')
+const { addresses, contracts, contractByAddress, tokenDecimals } = require('../utils/contracts')
 
 function strategyHoldingMetric({
   contractAddress,

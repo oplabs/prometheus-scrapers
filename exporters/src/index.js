@@ -1,8 +1,8 @@
 require('dotenv').config({})
 const express = require('express')
 
-const { provider } = require('./utils')
-const { register } = require('./prom')
+const { provider } = require('./utils/contracts')
+const { register } = require('./utils/prometheus')
 
 const app = express()
 
@@ -19,19 +19,18 @@ app.get('/network', async (req, res) => {
   })
 })
 
-app.get('/metrics/ousd_total_supply', async (req, res) => {
-  const metrics = await register.getSingleMetricAsString('ousd_total_supply')
+app.get('/metrics/all', async (req, res) => {
+  const metrics = await register.metrics()
   return res.status(200).send(metrics)
-
-//   return res.status(200).send(`# HELP ousd_total_supply ousd_total_supply
-// # TYPE ousd_total_supply gauge
-// ousd_total_supply 59063902
-// ousd_total_supply 29063902 ${Date.now() - (60 * 60 * 1000)}`)
 })
 
 app.get('/metrics/:metric', async (req, res) => {
-  const metrics = await register.getSingleMetricAsString(req.params.metric)
-  return res.status(200).send(metrics)
+  try {
+    const metrics = await register.getSingleMetricAsString(req.params.metric)
+    return res.status(200).send(metrics)
+  } catch (err) {
+    return res.status(404).end()
+  }
 })
 
 app.listen(port, () => {
